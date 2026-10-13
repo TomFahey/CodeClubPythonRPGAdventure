@@ -5,32 +5,31 @@ rooms = {
     'Hall' : {
         'south' : 'Kitchen',
         'east' : 'Dining Room',
-        'items' : ['key'],
-        'visited' : False,
-        'player' : True
+        'west' : 'Office',
+        'item' : 'key',
     },
     'Kitchen' : {
         'north' : 'Hall',
-        'items' : ['monster'],
-        'visited' : False,
-        'player' : False
+        'item' : 'monster',
     },
     'Dining Room' : {
         'west' : 'Hall',
         'south' : 'Garden',
-        'items' : ['potion'],
-        'visited' : False,
-        'player' : False
+        'item' : 'potion',
     },
     'Garden' : {
         'north' : 'Dining Room',
-        'visited' : False,
-        'player' : False
+        'south' : 'Garage',
+    },
+    'Garage' : {
+        'north' : 'Garden'
+    },
+    'Office' : {
+        'east' : 'Hall'
     }
 }
 
 currentRoom = 'Hall'
-rooms[currentRoom]['player'] = True
 
 # Keep this to run the game loop from game.py 
 currentRoom, inventory = run_game(currentRoom, inventory, rooms)
