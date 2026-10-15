@@ -5,7 +5,7 @@ Coding extension to the ["Escape the Maze"](https://projects.raspberrypi.org/en/
 Adding `gui_pure.py` to the Project files will allow you to import the `_showMap` and `_showInventory` functions.
 
 ```python
-from gui import _showMap, _showInventory  # Add this at the top of game.py
+from gui_pure import _showMap, _showInventory  # Add this at the top of game.py
 ```
 
 `game.py` shows a simple example of how to include these functions in the game,
