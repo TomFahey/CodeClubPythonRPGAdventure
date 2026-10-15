@@ -8,6 +8,30 @@ Adding `gui_pure.py` to the Project files will allow you to import the `_showMap
 from gui import _showMap, _showInventory  # Add this at the top of game.py
 ```
 
+`game.py` shows a simple example of how to include these functions in the game,
+
+```python
+def run_game(currentRoom, inventory, rooms):
+    showInstructions()
+
+    # Loop forever
+    while True:
+
+        showStatus(currentRoom, rooms)
+
+        ...
+
+        # If they type 'map', show the map
+        if move[0] == 'map':
+            _showMap(currentRoom, rooms)
+
+        # If they type 'inventory', show the inventory
+        if move[0] == 'inventory':
+            _showInventory(inventory)
+```
+
+however students are encouraged to explore their own unique ways of including this graphical feature in whichever manner they desire!
+
 ### _showMap
 
 `_showMap(currentRoom, rooms)` takes two arguments, the current room the player is in and the global `rooms` dictionary specified in `main.py`. Calling it will print out a emoji-based grid of the player's maze design, which hides the room the player hasn't discovered.
