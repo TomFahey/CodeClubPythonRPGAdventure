@@ -1,8 +1,8 @@
-from gui import _showMap, _showInventory, icons
+from gui import _showMap, _showInventory
 
 
 # An inventory, which is initially empty
-inventory = ["⬜", "⬜", "⬜", "⬜", "⬜"]
+inventory = []
 
 
 # Start the player in the Hall
@@ -24,9 +24,8 @@ def showStatus(currentRoom, rooms):
     # Print the player's current status
     print('---------------------------')
     print('You are in the ' + currentRoom)
-    if 'items' in rooms[currentRoom]:
-        for item in rooms[currentRoom]['items']:
-            print('You see a ' + item)
+    if 'item' in rooms[currentRoom]:
+        print('You see a ' + rooms[currentRoom]['item'])
     print('---------------------------')
     rooms[currentRoom]['visited'] = True
     
@@ -63,12 +62,12 @@ def run_game(currentRoom, inventory, rooms):
         # If they type 'get' first
         if move[0] == 'get':
             # If the room contains an item, and the item is the one they want to get
-            if 'items' in rooms[currentRoom] and move[1] in rooms[currentRoom]['items']:
+            if 'item' in rooms[currentRoom] and move[1] == rooms[currentRoom]['item']:
                 # Add the item to their inventory
-                inventory.insert(0, icons[move[1]])
+                inventory.insert(0, rooms[currentRoom]['item'])
                 print('You picked up the ' + move[1])
                 # Delete the item from the room
-                rooms[currentRoom]['items'].remove(move[1])
+                del rooms[currentRoom]['item']
             else:
                 # Tell them they can't get it
                 print('There is no ' + move[1] + ' here!')
@@ -81,7 +80,7 @@ def run_game(currentRoom, inventory, rooms):
         if move[0] == 'inventory':
             _showInventory(inventory)
 
-        if 'items' in rooms[currentRoom] and 'monster' in rooms[currentRoom]['items']:
+        if 'item' in rooms[currentRoom] and rooms[currentRoom]['item'] == 'monster':
             print('A monster has got you... GAME OVER!')
             break
 

@@ -1,0 +1,5 @@
+project-alignment.md
+gui.backup.py
+.vscode/settings.json
+./__pycache__/
+*.pyc
