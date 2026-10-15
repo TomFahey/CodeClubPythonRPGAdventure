@@ -1,4 +1,4 @@
-from gui import _showMap, _showInventory
+from gui import _showMap, _showRoom, _showInventory
 
 
 # An inventory, which is initially empty
@@ -27,6 +27,7 @@ def showStatus(currentRoom, rooms):
     if 'item' in rooms[currentRoom]:
         print('You see a ' + rooms[currentRoom]['item'])
     print('---------------------------')
+    _showRoom(currentRoom, rooms)
     rooms[currentRoom]['visited'] = True
     
 # Run the main game loop using state kept in `main.py`.
