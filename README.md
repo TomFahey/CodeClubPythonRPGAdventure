@@ -36,7 +36,7 @@ however students are encouraged to explore their own unique ways of including th
 
 `_showMap(currentRoom, rooms)` takes two arguments, the current room the player is in and the global `rooms` dictionary specified in `main.py`. Calling it will print out a emoji-based grid of the player's maze design, which hides the room the player hasn't discovered.
 
-
+```
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
@@ -52,6 +52,7 @@ however students are encouraged to explore their own unique ways of including th
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
+```
 
 
 Various items can be added to rooms by including them under the `item` key for a given room in the `rooms` dictionary - a fairly comprehensive list of item names that will print a corresponding emoji can be found at the top of the `gui_pure.py` file:
@@ -88,7 +89,7 @@ icons = {
 ■■■■■■■■■■■■■■■■■■■■■■
 
 When an item is picked up from a room, it will visibly disappear from the map
-
+```
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🔑️▪️▪️🧱🧪▪️▪️▪️▪️🧱⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
@@ -104,6 +105,7 @@ When an item is picked up from a room, it will visibly disappear from the map
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🧱🚪🧱🧱🧱🧱🚪🧱🧱🧱⬛⬛⬛⬛
+```
 
 Learners can try to implement their own Python code to handle the inventory, such as how many items they are allowed to pick before the inventory bar becomes "full", or what happens to "consumable" items when they get used.
 
