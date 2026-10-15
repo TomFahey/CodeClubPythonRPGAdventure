@@ -371,6 +371,16 @@ def _showInventory(inventory):
     picked_up += [icons['white_square']] * (INVENTORY_SIZE - len(picked_up))
     print(inventory_bar.format(*picked_up))
 
+    
+def _showRoom(currentRoom, rooms):
+    """Draw the current room in isolation."""
+    game_map = GameMap(rooms)
+    current_room = game_map.rooms[currentRoom]
+    data = current_room.data
+    data[current_room.height // 2][current_room.width // 2] = icons['player']
+    for row in data:
+        print(''.join(row))
+
 
 def _showMap(currentRoom, rooms):
     """Draw the whole dungeon.  This is the other call game.py needs."""
