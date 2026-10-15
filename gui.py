@@ -61,7 +61,7 @@ icons = {
     "statue" :          f"\N{MOYAI}",                           ### 🗿
     "cobweb" :          f"\N{SPIDER WEB}",                      ### 🕸️
     ### Miscellaneous
-    "question_mark" :   f"\N{WHITE_QUESTION_MARK_ORNAMENT}",    ### ❔
+    "question_mark" :   f"\N{WHITE QUESTION MARK ORNAMENT}",    ### ❔
     "empty" :           f""                                     ### 
 
 }
@@ -370,6 +370,15 @@ def _showInventory(inventory):
     picked_up = [icons.get(item, UNKNOWN_ITEM) for item in inventory[:INVENTORY_SIZE]]
     picked_up += [icons['white_square']] * (INVENTORY_SIZE - len(picked_up))
     print(inventory_bar.format(*picked_up))
+
+def _showRoom(currentRoom, rooms):
+    """Draw the current room in isolation."""
+    game_map = GameMap(rooms)
+    current_room = game_map.rooms[currentRoom]
+    data = current_room.data
+    data[current_room.height // 2][current_room.width // 2] = icons['player']
+    for row in data:
+        print(''.join(row))
 
 
 def _showMap(currentRoom, rooms):

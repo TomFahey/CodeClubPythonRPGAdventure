@@ -28,24 +28,47 @@ DIRECTIONS = ('north', 'south', 'east', 'west')
 UNKNOWN_ITEM = "\U00002753"    # ❓
 
 icons = {
-    "key" :             "\U0001F511\U0000FE0F",      ### 🔑
-    "dagger" :          "\U0001F5E1\U0000FE0F",      ### 🗡 
-    "sword" :           "\U0001F5E1\U0000FE0F",      ### 🗡️
-    "shield" :          "\U0001F6E1\U0000FE0F",      ### 🛡️
-    "potion" :          "\U0001F9EA",                ### 🧪
-    "bow" :             "\U0001F3F9",                ### 🏹
-    "axe" :             "\U0001FA93",                ### 🪓
-    "player" :          "\U0001F9CD",                ### 🧍
-    "monster" :         "\U0001F479",                ### 👹
-    "treasure" :        "\U0001F4B0",                ### 💰
-    "door" :            "\U0001F6AA",                ### 🚪
-    "wall" :            "\U0001F9F1",                ### 🧱
-    "wallpaper" :       "\U0001F7EB",                ### 🟫
-    "black_square" :    "\U00002B1B",                ### ⬛
-    "white_square" :    "\U00002B1C",                ### ⬜
-    "lock" :            "\U0001F512",                ### 🔒
-    "floor" :           "\U000025AA\U0000FE0F",      ### ▪️
-    "empty" :           "",                          ### 
+    ### Weapons
+    "dagger" :          "\U0001F5E1\U0000FE0F",                 ### 🗡 
+    "sword" :           "\U0001F5E1\U0000FE0F",                 ### 🗡️
+    "shield" :          "\U0001F6E1\U0000FE0F",                 ### 🛡️
+    "bow" :             "\U0001F3F9",                           ### 🏹
+    "axe" :             "\U0001FA93",                           ### 🪓
+    "torch" :           "\U0001F526",                           ### 🔦
+    ### Consumables
+    "potion" :          "\U0001F9EA",                           ### 🧪
+    "key" :             "\U0001F511\U0000FE0F",                 ### 🔑
+    "treasure" :        "\U0001F4B0",                           ### 💰
+    ### Entities
+    "player" :          "\U0001F9CD",                           ### 🧍
+    "monster" :         "\U0001F479",                           ### 👹
+    "vampire" :         "\U0001F9DB",                           ### 🧛
+    "zombie" :          "\U0001F9DF",                           ### 🧟
+    "ninja" :           "\U0001F977",                           ### 🥷
+    "spider" :          "\U0001F577\U0000FE0F",                 ### 🕷️
+    "snake" :           "\U0001F40D",                           ### 🐍
+    "lizard" :          "\U0001F98E",                           ### 🦎
+    "bat" :             "\U0001F987",                           ### 🦇
+    "harambe" :         "\U0001F98D",                           ### 🦍
+    "shark" :           "\U0001F988",                           ### 🦈
+    "crocodile" :       "\U0001F40A",                           ### 🐊
+    ### Obstacles
+    "lock" :            "\U0001F512",                           ### 🔒
+    "door" :            "\U0001F6AA",                           ### 🚪
+    ### Environment
+    "wall" :            "\U0001F9F1",                           ### 🧱
+    "wallpaper" :       "\U0001F7EB",                           ### 🟫
+    "black_square" :    "\U00002B1B",                           ### ⬛
+    "white_square" :    "\U00002B1C",                           ### ⬜
+    "floor" :           "\U000025AA\U0000FE0F",                 ### ▪️
+    ### Decorations
+    "plant" :           "\U0001FAB4",                           ### 🪴
+    "statue" :          "\U0001F5FF",                           ### 🗿
+    "cobweb" :          "\U0001F578",                           ### 🕸️
+    ### Miscellaneous
+    "question_mark" :   "\U00002754",                           ### ❔
+    "empty" :           "",                                     ### 
+
 }
 
 inventory_bar = r"""
@@ -359,6 +382,15 @@ def _showInventory(inventory):
     picked_up = [icons.get(item, UNKNOWN_ITEM) for item in inventory[:INVENTORY_SIZE]]
     picked_up += [icons['white_square']] * (INVENTORY_SIZE - len(picked_up))
     print(inventory_bar.format(*picked_up))
+
+def _showRoom(currentRoom, rooms):
+    """Draw the current room in isolation."""
+    game_map = GameMap(rooms)
+    current_room = game_map.rooms[currentRoom]
+    data = current_room.data
+    data[current_room.height // 2][current_room.width // 2] = icons['player']
+    for row in data:
+        print(''.join(row))
 
 
 def _showMap(currentRoom, rooms):
