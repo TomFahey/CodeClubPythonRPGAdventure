@@ -74,14 +74,13 @@ def run_game(currentRoom, inventory, rooms):
         elif view == 'inventory':
             _showInventory(inventory)
 
-    
-    def check_conditions():
-    
-    
     showInstructions()
+
 
     # Loop forever
     while True:
+
+
 
         showStatus(currentRoom, rooms)
 
@@ -103,7 +102,6 @@ def run_game(currentRoom, inventory, rooms):
         # If they type 'show', show the map or inventory
         if command == 'show':
             show_command(view=argument)
-
 
         if 'item' in rooms[currentRoom] and rooms[currentRoom]['item'] == 'monster':
             print('A monster has got you... GAME OVER!')
