@@ -141,15 +141,22 @@ class Room:
     def room_tile(self):
         """This room drawn as its own small grid of glyphs."""
         walls = self.walls()
+        # Tile wall and floor areas with their respective icons
         tile = [
             [icons['wall'] if walls[row][column] else icons['floor']
              for column in range(self.width)]
             for row in range(self.height)
         ]
+        # Tile doorways with the door icon
         for direction in self.doors:
             row, column = self.doorway(direction)
             tile[row][column] = icons['door']
-        for (row, column), item in zip(self.item_slots(), self.items):
+        slots = self.item_slots()
+        # Tile items with their respective icons
+        for item in self.items:
+            # Pseudo-random placement of item based on its name
+            index = sum(ord(c) for c in item) % len(slots)
+            row, column = slots.pop(index)
             tile[row][column] = icons.get(item, UNKNOWN_ITEM)
         return tile
 

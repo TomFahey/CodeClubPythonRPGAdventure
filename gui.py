@@ -61,7 +61,7 @@ icons = {
     "statue" :          f"\N{MOYAI}",                           ### 🗿
     "cobweb" :          f"\N{SPIDER WEB}",                      ### 🕸️
     ### Miscellaneous
-    "question_mark" :   f"\N{WHITE_QUESTION_MARK_ORNAMENT}",    ### ❔
+    "question_mark" :   f"\N{WHITE QUESTION MARK ORNAMENT}",    ### ❔
     "empty" :           f""                                     ### 
 
 }
@@ -131,12 +131,16 @@ class Room:
     def room_tile(self):
         """This room drawn as its own small grid of glyphs."""
         tile = np.full((self.height, self.width), "", dtype=TILE_DTYPE)
-        tile[self.walls()] = icons['wall']
-        tile[self.floor()] = icons['floor']
+        tile[self.walls()] = icons['wall'] # Tile wall areas with wall icon
+        tile[self.floor()] = icons['floor'] # Tile floor areas with floor icon
         for direction in self.doors:
-            tile[self.doorway(direction)] = icons['door']
-        for cell, item in zip(self.item_slots(), self.items):
-            tile[cell] = icons.get(item, UNKNOWN_ITEM)
+            tile[self.doorway(direction)] = icons['door'] # Tile doorways with door icon
+        slots = self.item_slots()
+        for item in self.items:
+            # Pseudo-random placement of item based on its name
+            index = sum(ord(c) for c in item) % len(slots)
+            cell = slots.pop(index)
+            tile[cell] = icons.get(item, UNKNOWN_ITEM) # Tile item at the chosen cell
         return tile
 
     @property
@@ -371,7 +375,6 @@ def _showInventory(inventory):
     picked_up += [icons['white_square']] * (INVENTORY_SIZE - len(picked_up))
     print(inventory_bar.format(*picked_up))
 
-    
 def _showRoom(currentRoom, rooms):
     """Draw the current room in isolation."""
     game_map = GameMap(rooms)
