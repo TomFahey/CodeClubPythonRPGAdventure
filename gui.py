@@ -131,12 +131,16 @@ class Room:
     def room_tile(self):
         """This room drawn as its own small grid of glyphs."""
         tile = np.full((self.height, self.width), "", dtype=TILE_DTYPE)
-        tile[self.walls()] = icons['wall']
-        tile[self.floor()] = icons['floor']
+        tile[self.walls()] = icons['wall'] # Tile wall areas with wall icon
+        tile[self.floor()] = icons['floor'] # Tile floor areas with floor icon
         for direction in self.doors:
-            tile[self.doorway(direction)] = icons['door']
-        for cell, item in zip(self.item_slots(), self.items):
-            tile[cell] = icons.get(item, UNKNOWN_ITEM)
+            tile[self.doorway(direction)] = icons['door'] # Tile doorways with door icon
+        slots = self.item_slots()
+        for item in self.items:
+            # Pseudo-random placement of item based on its name
+            index = sum(ord(c) for c in item) % len(slots)
+            cell = slots.pop(index)
+            tile[cell] = icons.get(item, UNKNOWN_ITEM) # Tile item at the chosen cell
         return tile
 
     @property
