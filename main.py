@@ -22,6 +22,7 @@ rooms = {
         'south' : 'Garage',
     },
     'Garage' : {
+        'access' : 'Locked',
         'north' : 'Garden'
     },
     'Office' : {

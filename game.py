@@ -46,11 +46,19 @@ def get_player_command():
 def run_game(currentRoom, inventory, rooms):
 
     def go_command(direction):
+        nonlocal rooms
         """Move the player to a different room if possible"""
         # First we check if the direction is valid
         if direction in rooms[currentRoom]:
             # If it is, we move the player to the new room
             newRoom = rooms[currentRoom][direction]
+            if 'access' in newRoom:
+                if newRoom['access'] == 'Locked' and 'key' not in inventory:
+                    print('The door is locked. You need a key to enter.')
+                    return currentRoom
+                else:
+                    rooms[newRoom]['access'] = 'Unlocked'
+                    print('You unlocked the door.')
             return newRoom
         else:
             print('You cannot go that way!')
