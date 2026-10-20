@@ -16,7 +16,8 @@ The editor there also has only a cut-down standard library: it provides
 imports `random` and nothing else.
 """
 
-import random
+import random as ran
+
 
 INVENTORY_SIZE = 5     # how many items the inventory bar has room for
 ROOM_SIZES = (5, 7)    # the sizes a room may be given, in tiles
@@ -60,7 +61,7 @@ icons = {
     "wallpaper" :       "\U0001F7EB",                           ### 🟫
     "black_square" :    "\U00002B1B",                           ### ⬛
     "white_square" :    "\U00002B1C",                           ### ⬜
-    "floor" :           "\U000025AA\U0000FE0F",                 ### ▪️
+    "floor" :           " ",                 ### ▪️
     ### Decorations
     "plant" :           "\U0001FAB4",                           ### 🪴
     "statue" :          "\U0001F5FF",                           ### 🗿
@@ -234,7 +235,7 @@ class GameMap:
         # may not manage a string.
         if seed is None:
             seed = sum(ord(character) for character in ''.join(sorted(rooms)))
-        random.seed(seed)
+        ran.seed(seed)
 
         for name, room in rooms.items():
             for way in DIRECTIONS:
@@ -268,14 +269,14 @@ class GameMap:
         #    to each group of rooms joined that way...
         widths = {}
         for group in groups(('north', 'south')):
-            width = random.choice(ROOM_SIZES)
+            width = ran.choice(ROOM_SIZES)
             for name in group:
                 widths[name] = width
 
         #    ...and one height to each group of rooms joined east/west.
         heights = {}
         for group in groups(('east', 'west')):
-            height = random.choice(ROOM_SIZES)
+            height = ran.choice(ROOM_SIZES)
             for name in group:
                 heights[name] = height
 
@@ -404,5 +405,4 @@ def _showMap(currentRoom, rooms):
     """Draw the whole dungeon.  This is the other call game.py needs."""
     game_map = GameMap(rooms)
     game_map.current_room = game_map.rooms[currentRoom]
-    for row in game_map.render():
-        print(''.join(row))
+    return game_map.render()
