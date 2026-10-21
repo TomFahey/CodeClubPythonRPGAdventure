@@ -1,118 +1,158 @@
-from gui_pure import _showMap, _showRoom, _showInventory
-# An inventory, which is initially empty
-inventory = []
 from p5 import loop, no_loop
 
 
-# Start the player in the Hall
-
-def showInstructions():
-    # Print a main menu and the commands
+def showIntroduction():
+    """Print the message shown at the start of the game"""
     print('''
-Monster Game
-========
-Commands:
-go [direction]
-get [item]
-show [map, inventory]
+Really cool sounding game title
+===============================
+
+I need to escape the dungeon!
 ''')
 
 
-def showStatus(gamestate):
-    # Print the player's current status
+
+def showInstructions():
+    """Print the list of commands available to the player"""
+    print('''
+Commands: cmd [argument]
+
+go [direction]   # e.g go west
+get [item]       # e.g get key
+''')
+
+
+
+def showStatus(state):
+    """Print a message showing the room the player is
+    currenly in, as well as any items that are present
+    and return the current room they are in.
+    """
     print('---------------------------')
-    print('You are in the ' + gamestate.currentRoom)
-    if 'item' in gamestate.rooms[gamestate.currentRoom]:
-        print('You see a ' + gamestate.rooms[gamestate.currentRoom]['item'])
+    print('You are in the ' + state.currentRoom)
+    if 'item' in state.map[state.currentRoom]:
+        print('You see a ' + state.map[state.currentRoom]['item'])
     print('---------------------------')
-    gamestate.rooms[gamestate.currentRoom]['visited'] = True
+    state.map[state.currentRoom]['visited'] = True
+    return state.currentRoom
+
 
     
 def get_player_command():
-    # Get the player's next 'move'
-    # .split() breaks it up into an list array
-    # e.g. typing 'go east' would give the list:
-    # ['go','east']
+    """Get the player's next 'move'
+    
+    .split() breaks it up into the command and argument
+    e.g. typing 'go east' would give the result:
+    command, argument = ['go','east']
+    """
     move = ''
     while move == '':
         move = input('>')
-    command, argument = move.lower().split()
+    try:
+        command, argument = move.lower().split()
+    except ValueError:
+        command, argument = move.lower(), None
     return command, argument
 
 
+
+def go_command(direction, currentRoom, state):
+    """Move the player to a different room if possible
+
+    If there is a room in the *direction* they pick,
+    return that room. If not, just return the room they
+    are currently in
+    """
+    # First we get the dictionary of *available directions*
+    available_directions = state.map[currentRoom]
+    # If the direction we has picked is in avaialable directions,
+    # return the new room
+    if direction in available_directions: 
+        newRoom = state.map[currentRoom][direction]
+        return newRoom
+    else:
+        print('You cannot go that way!')
+        return currentRoom
+
+
+
+def get_command(item, currentRoom, state):
+    """Get the specified *item* from the room
+
+    If the requested *item* is in the room, move it to the
+    player's inventory and delete it from the room. If it
+    is not in the room, print a message saying so.
+    """
+    if item is None:
+        print("You didn't tell me what to get!")
+    elif 'item' in state.map[currentRoom] and item == state.map[currentRoom]['item']:
+        # Add the item to their inventory
+        state.inventory.insert(0, state.map[currentRoom]['item'])
+        print('You picked up the ' + item)
+        # Delete the item from the room
+        del state.map[currentRoom]['item']
+    else:
+        # Tell them they can't get it
+        print('There is no ' + item + ' here!')
+
+
     
-# Run the main game loop using state kept in `main.py`.
-def run_game(gamestate):
 
-    def go_command(direction):
-        """Move the player to a different room if possible"""
-        # First we check if the direction is valid
-        if direction in gamestate.rooms[gamestate.currentRoom]:
-            # If it is, we move the player to the new room
-            newRoom = gamestate.rooms[gamestate.currentRoom][direction]
-            if 'access' in newRoom:
-                if newRoom['access'] == 'Locked' and 'key' not in inventory:
-                    print('The door is locked. You need a key to enter.')
-                    return gamestate.currentRoom
-                else:
-                    gamestate.rooms[newRoom]['access'] = 'Unlocked'
-                    print('You unlocked the door.')
-            return newRoom
-        else:
-            print('You cannot go that way!')
-            return gamestate.currentRoom
+def run_game(player):
+    """Run the game! 
+    
+    Call this from the main.py file, using a Player object to track
+    the game's progress.
+    """
 
-    def get_command(item, gamestate):
-        # If the room contains an item, and the item is the one they want to get
-        if 'item' in gamestate.rooms[gamestate.currentRoom] and item == gamestate.rooms[gamestate.currentRoom]['item']:
-            # Add the item to their inventory
-            gamestate.inventory.insert(0, gamestate.rooms[gamestate.currentRoom]['item'])
-            print('You picked up the ' + item)
-            # Delete the item from the room
-            del gamestate.rooms[gamestate.currentRoom]['item']
-        else:
-            # Tell them they can't get it
-            print('There is no ' + item + ' here!')
-
-    def show_command(view):
-        if view == 'map':
-            _showMap(gamestate.currentRoom, gamestate.rooms)
-        elif view == 'inventory':
-            _showInventory(gamestate.inventory)
-
-    showInstructions()
+    showIntroduction() # Show the introduction text
+    showInstructions() # Show the instruction text
 
     # Loop forever
     while True:
-        showStatus(gamestate)
+        
+        ######## Step 1) Show the Player's current status, using the *player* state
+        
+        currentRoom = showStatus(player)
         loop()
-        # Get the player's next command:
-        # the first word is the command, the second word is the argument
-        # e.g typing 'go east' is equivalent to setting:
-        # command = 'go'
-        # argument = 'east'
+        
+
+        ######## Step 2) Get the player's command that they have typed in
+        
         command, argument = get_player_command()
 
-        # If the command is 'go', run the go_command function
-        if command == 'go':
-            gamestate.currentRoom = go_command(direction=argument)
+        
 
-        # If they type 'get'
-        if command == 'get':
-            get_command(item=argument, gamestate=gamestate)
+        ######## Step 3) Match the *command* and *argument* to the right function
+        
+        if command == 'go': # If the command is 'go', run the go_command function
+            player.currentRoom = go_command(argument, currentRoom, player)
+            
+        elif command == 'get': # If the command is 'get', run the get_command function
+            get_command(argument, currentRoom, player)
+                
+        elif command == '?': # If the command is '?', show the instructions again
+            showInstructions()
+            
+        #-------------- Add more commands here... --------------#
+        
+        else: # Finally, if no commands are recognised, print out a message saying so
+            print(f"Sorry, I didn't recognise {command}")
 
-        # If they type 'show', show the map or inventory
-        if command == 'show':
-            show_command(view=argument)
+        
 
-        if 'item' in gamestate.rooms[gamestate.currentRoom] and gamestate.rooms[gamestate.currentRoom]['item'] == 'monster':
+        ######## Step 4) Check the game conditions
+        
+        # Player is in the room with a monster
+        if 'item' in player.map[currentRoom] and player.map[currentRoom]['item'] == 'monster':
             print('A monster has got you... GAME OVER!')
             break
+            
+        #------------- Add more conditions here... ------------#
+
+
 
         no_loop()
 
-        
-        # add more game play here
 
-
-    return gamestate.currentRoom, gamestate.inventory
+    return player.currentRoom, player.inventory

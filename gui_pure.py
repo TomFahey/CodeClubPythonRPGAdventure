@@ -17,11 +17,13 @@ imports `random` and nothing else.
 """
 
 import random as ran
+from p5 import *
 
-
+FONT = None
 INVENTORY_SIZE = 5     # how many items the inventory bar has room for
 ROOM_SIZES = (5, 7)    # the sizes a room may be given, in tiles
 MAP_MARGIN = 4         # black tiles kept round the outside of the rooms
+TEXT_SIZE = 8
 
 DIRECTIONS = ('north', 'south', 'east', 'west')
 
@@ -68,15 +70,12 @@ icons = {
     "cobweb" :          "\U0001F578",                           ### 🕸️
     ### Miscellaneous
     "question_mark" :   "\U00002754",                           ### ❔
+    "heart" :           "\U0001F9E1",                           ### 🧡
     "empty" :           "",                                     ### 
 
 }
 
-inventory_bar = r"""
-■■■■▶ Inventory ◀■■■■
-▫ {0} {1} {2} {3} {4} ▫
-■■■■■■■■■■■■■■■■■■■■■■
-"""
+inventory_bar = r"""▫ {0} {1} {2} {3} {4} ▫"""
 
 class Room:
     """One room of the dungeon.
@@ -359,7 +358,7 @@ class GameMap:
         """
         if current_room is None:
             current_room = self.current_room
-        map_data = [[icons['black_square']] * self.cols for _ in range(self.rows)]
+        map_data = [[icons['empty']] * self.cols for _ in range(self.rows)]
 
         for room in self.rooms.values():
             if room.visited or room is current_room:
@@ -382,16 +381,16 @@ class GameMap:
         return f"GameMap({len(self.rooms)} rooms, {self.cols}x{self.rows})"
 
 
-def _showInventory(inventory):
+def showInventory(inventory):
     """Draw the inventory bar.  ``inventory`` holds the names of items picked up.
 
     This is one of the two calls game.py needs.
     """
     picked_up = [icons.get(item, UNKNOWN_ITEM) for item in inventory[:INVENTORY_SIZE]]
     picked_up += [icons['white_square']] * (INVENTORY_SIZE - len(picked_up))
-    print(inventory_bar.format(*picked_up))
+    return inventory_bar.format(*picked_up)
 
-def _showRoom(currentRoom, rooms):
+def showRoom(currentRoom, rooms):
     """Draw the current room in isolation."""
     game_map = GameMap(rooms)
     current_room = game_map.rooms[currentRoom]
@@ -401,8 +400,45 @@ def _showRoom(currentRoom, rooms):
         print(''.join(row))
 
 
-def _showMap(currentRoom, rooms):
+def showMap(currentRoom, rooms):
     """Draw the whole dungeon.  This is the other call game.py needs."""
     game_map = GameMap(rooms)
     game_map.current_room = game_map.rooms[currentRoom]
     return game_map.render()
+
+
+def setup():
+    size(400, 400)
+    no_stroke()
+    text_size(TEXT_SIZE)
+    FONT = load_font("https://github.com/googlefonts/noto-emoji/raw/refs/heads/main/2D/fonts/NotoColorEmoji_WindowsCompatible.ttf")
+    if FONT is not None:
+        text_font(FONT)
+    else:
+        print('Failed to load font')
+    no_loop()
+
+def draw_background():
+    BROWN = Color(185, 155, 115)
+    BLUE = Color(5, 5, 5)
+    background(BLUE) 
+    fill(BROWN)
+
+def draw_map(state, x_scale, y_scale, x_offset, y_offset):
+    game_map = showMap(state.currentRoom, state.map)
+    for row_number, row in enumerate(game_map):
+        for col_number,character, in enumerate(row):
+            text(character, x_offset+col_number*x_scale, y_offset+row_number*y_scale)
+
+def draw_healthbar(health):
+    text(health*icons['heart'], 330, 30)
+
+def draw_inventory(inventory):
+    text(showInventory(inventory), 30, 30)
+        
+def draw_all(state):
+    draw_background()
+    draw_map(state, TEXT_SIZE, TEXT_SIZE, 100, 100)
+    draw_inventory(state.inventory)
+    if 'health' in state.__dict__:
+        draw_healthbar(state.health)
