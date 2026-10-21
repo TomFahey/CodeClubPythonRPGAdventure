@@ -2,110 +2,99 @@
 
 Coding extension to the ["Escape the Maze"](https://projects.raspberrypi.org/en/projects/editor-rpg/landing) Code Club project, for new Python coders.
 
-Adding `gui_pure.py` to the Project files will allow you to import the `_showMap` and `_showInventory` functions.
+<img width="1602" height="1833" alt="image" src="https://github.com/user-attachments/assets/0b81fea6-89a0-4476-adaa-14b6c300330f" />
+
+This extension adds a somewhat more exciting graphical component to the original lesson plan, allowing learners to visually relate the programming concepts they are developing (namely, structured data formats, like Python dictionaries) to a real game world.
+
+## How to use
+
+The easiest way to use this extension is by simply copying the provided `main.py`, `game.py` and `gui_pure.py` files into the Python Code Editor either at the [original lesson page](https://projects.raspberrypi.org/en/projects/editor-rpg/editor) or the [individual projects editor](https://editor.raspberrypi.org/en/projects/) website.
+
+The changes to the original code are described below.
+
+## Main.py 
+
+### Changes
+
+The following import statements are used at the top of `main.py` file to import the relevant graphics rendering functions from `gui_pure.py`.
 
 ```python
-from gui_pure import _showMap, _showInventory  # Add this at the top of game.py
+from gui_pure import setup, draw_all
+from p5 import run
 ```
-
-`game.py` shows a simple example of how to include these functions in the game,
+The following code is also added after the `rooms` dictionary definition:
 
 ```python
-def run_game(currentRoom, inventory, rooms):
-    showInstructions()
+# A dictionary linking a room to other rooms
+rooms = {
+...
+} # Existing rooms definition
 
-    # Loop forever
-    while True:
+############################################################# New code
+class Player:
 
-        showStatus(currentRoom, rooms)
+    def __init__(self, startingRoom, map):
+        self.currentRoom = startingRoom
+        self.map = rooms 
+        self.inventory = [] # Empty
+        self.health = 3 # 3 hearts
 
-        ...
+# We create our player object, that records
+# which room we are currently in, our inventory
+# and which rooms we have visited.
+player = Player(
+    startingRoom='Hall', 
+    map = rooms
+)
 
-        # If they type 'map', show the map
-        if move[0] == 'map':
-            _showMap(currentRoom, rooms)
+def draw():
+    global gamestate
+    draw_all(player)
 
-        # If they type 'inventory', show the inventory
-        if move[0] == 'inventory':
-            _showInventory(inventory)
+    
+run(frame_rate=1)
+#############################################################
+# Keep this to run the game loop from game.py 
+currentRoom, inventory = run_game(player)
 ```
+### Explanation
 
-however students are encouraged to explore their own unique ways of including this graphical feature in whichever manner they desire!
-
-### _showMap
-
-`_showMap(currentRoom, rooms)` takes two arguments, the current room the player is in and the global `rooms` dictionary specified in `main.py`. Calling it will print out a emoji-based grid of the player's maze design, which hides the room the player hasn't discovered.
-
-```
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛🧱🧱🧱🧱🧱⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛🧱🔑️▪️▪️🧱⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛🚪▪️🧍▪️🚪⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛🧱🧱🚪🧱🧱⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
-```
-
-
-Various items can be added to rooms by including them under the `item` key for a given room in the `rooms` dictionary - a fairly comprehensive list of item names that will print a corresponding emoji can be found at the top of the `gui_pure.py` file:
+The `Player` class is necessary to allow changes in the game state caused by the code in `game.py` to carry over to changes in the visual output, handled by `gui_pure.py`. Because the original function signature for `run_game()`,
 
 ```python
-icons = {
-    "key" :             "\U0001F511\U0000FE0F",      ### 🔑
-    "dagger" :          "\U0001F5E1\U0000FE0F",      ### 🗡 
-    "sword" :           "\U0001F5E1\U0000FE0F",      ### 🗡️
-    "shield" :          "\U0001F6E1\U0000FE0F",      ### 🛡️
-    "potion" :          "\U0001F9EA",                ### 🧪
-    "bow" :             "\U0001F3F9",                ### 🏹
-    "axe" :             "\U0001FA93",                ### 🪓
-    "player" :          "\U0001F9CD",                ### 🧍
-    "monster" :         "\U0001F479",                ### 👹
-    "treasure" :        "\U0001F4B0",                ### 💰
-    "door" :            "\U0001F6AA",                ### 🚪
-    "wall" :            "\U0001F9F1",                ### 🧱
-    "wallpaper" :       "\U0001F7EB",                ### 🟫
-    "black_square" :    "\U00002B1B",                ### ⬛
-    "white_square" :    "\U00002B1C",                ### ⬜
-    "lock" :            "\U0001F512",                ### 🔒
-    "floor" :           "\U000025AA\U0000FE0F",      ### ▪️
-    "empty" :           "",                          ### 
-}
+run_game(currentRoom, inventory, rooms)
 ```
 
-### _showInventory
+treated the basic game state (`currentRoom`, `inventory`, `rooms`) as local variables inside itself, changes to these values could not be communicated to the code in `gui_pure.py`. The `player` object therefore provides a globally accessible replacement, which code in both `gui_pure.py` and `game.py` are able to reach.
 
-`_showInventory(inventory)` takes the player's `inventory` list and shows the following bar, populated with the matching emojis:
+### Implications
 
-■■■■▶ Inventory ◀■■■■
-▫ 🧪 🔑️ ⬜ ⬜ ⬜ ▫
-■■■■■■■■■■■■■■■■■■■■■■
+For pedagogical purposes, I think it is reasonable to essentially allow learners to "gloss over" this detail, as functionally speaking, from the point of view of `game.py`, the `player` object just ends up acting as a container object for the previous (`currentRoom`, `inventory`, `rooms`) variables, so `currentRoom -> player.currentRoom`, `inventory -> player.inventory` etc.
 
-When an item is picked up from a room, it will visibly disappear from the map
+In a similar manner, `draw()` and `run()` should simply be treated as black-box functions that implement the graphical output, as they are beyond the scope of the lesson concepts.
+
+## game.py
+
+### Changes
+
+As mentioned above, the change of the function signature for `run_game()` requires modifying any references to `currentRoom`, `inventory` and `rooms` in `game.py`, for `player.currentRoom`, `player.inventory` and `player.map`, i.e
+
+```python
+def run_game(currentRoom, inventory, rooms): # old
+... 
 ```
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🔑️▪️▪️🧱🧪▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🚪▪️▪️▪️🚪▪️▪️🧍▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🧱🚪🧱🧱🧱🧱🚪🧱🧱🧱⬛⬛⬛⬛
+becomes
 
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🔑️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🚪▪️▪️▪️🚪▪️▪️🧍▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱▪️▪️▪️🧱▪️▪️▪️▪️▪️🧱⬛⬛⬛⬛
-⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛🧱🧱🚪🧱🧱🧱🧱🚪🧱🧱🧱⬛⬛⬛⬛
+```python
+def run_game(player): # new
+...
 ```
 
-Learners can try to implement their own Python code to handle the inventory, such as how many items they are allowed to pick before the inventory bar becomes "full", or what happens to "consumable" items when they get used.
+For convenience, these changes are already implemented in the provided `game.py` file, which is otherwise like the original (so it is possible to re-use the original lesson plan).
+
+Alternatively, a more extensively re-worked version of `game.py` is provided in `game-alternative.py` (make sure to rename this to `game.py` in the Code Club editor if you wish to use it), which rearranges the original code in such a way as to (hopefully) make it easier for new learners to understand and add their own modifications to.
+
+
+
+
 
