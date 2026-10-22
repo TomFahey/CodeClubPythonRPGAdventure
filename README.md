@@ -65,7 +65,7 @@ The `Player` class is necessary to allow changes in the game state caused by the
 run_game(currentRoom, inventory, rooms)
 ```
 
-treated the basic game state (`currentRoom`, `inventory`, `rooms`) as local variables inside itself, changes to these values could not be communicated to the code in `gui.py`. The `player` object therefore provides a globally accessible replacement, which code in both `gui.py` and `game.py` are able to reach.
+treated the basic game state (`currentRoom`, `inventory`, `rooms`) as local variables inside the function's namespace, changes to these values could not be communicated to the code in `gui.py`. The `player` object therefore provides a globally accessible replacement, which code in both `gui.py` and `game.py` are able to reach.
 
 ### Implications
 
