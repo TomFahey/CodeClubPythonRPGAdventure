@@ -8,7 +8,7 @@ This extension adds a somewhat more exciting graphical component to the original
 
 ## How to use
 
-The easiest way to use this extension is by simply copying the provided `main.py`, `game.py` and `gui_pure.py` files into the Python Code Editor either at the [original lesson page](https://projects.raspberrypi.org/en/projects/editor-rpg/editor) or the [individual projects editor](https://editor.raspberrypi.org/en/projects/) website.
+The easiest way to use this extension is by simply copying the provided `main.py`, `game.py` and `gui.py` files into the Python Code Editor either at the [original lesson page](https://projects.raspberrypi.org/en/projects/editor-rpg/editor) or the [individual projects editor](https://editor.raspberrypi.org/en/projects/) website.
 
 The changes to the original code are described below.
 
@@ -16,10 +16,10 @@ The changes to the original code are described below.
 
 ### Changes
 
-The following import statements are used at the top of `main.py` file to import the relevant graphics rendering functions from `gui_pure.py`.
+The following import statements are used at the top of `main.py` file to import the relevant graphics rendering functions from `gui.py`.
 
 ```python
-from gui_pure import setup, draw_all
+from gui import setup, draw_all
 from p5 import run
 ```
 The following code is also added after the `rooms` dictionary definition:
@@ -59,13 +59,13 @@ currentRoom, inventory = run_game(player)
 ```
 ### Explanation
 
-The `Player` class is necessary to allow changes in the game state caused by the code in `game.py` to carry over to changes in the visual output, handled by `gui_pure.py`. Because the original function signature for `run_game()`,
+The `Player` class is necessary to allow changes in the game state caused by the code in `game.py` to carry over to changes in the visual output, handled by `gui.py`. Because the original function signature for `run_game()`,
 
 ```python
 run_game(currentRoom, inventory, rooms)
 ```
 
-treated the basic game state (`currentRoom`, `inventory`, `rooms`) as local variables inside itself, changes to these values could not be communicated to the code in `gui_pure.py`. The `player` object therefore provides a globally accessible replacement, which code in both `gui_pure.py` and `game.py` are able to reach.
+treated the basic game state (`currentRoom`, `inventory`, `rooms`) as local variables inside itself, changes to these values could not be communicated to the code in `gui.py`. The `player` object therefore provides a globally accessible replacement, which code in both `gui.py` and `game.py` are able to reach.
 
 ### Implications
 
