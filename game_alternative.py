@@ -63,11 +63,11 @@ def go_command(direction, currentRoom, state):
     return that room. If not, just return the room they
     are currently in
     """
-    # First we get the dictionary of *available directions*
-    available_directions = state.map[currentRoom]
-    # If the direction we has picked is in avaialable directions,
-    # return the new room
-    if direction in available_directions: 
+    # First we get the dictionary containing the room description
+    room_description = state.map[currentRoom]
+    # If the direction we has picked is in the room description,
+    # we can move to that room
+    if direction in room_description: 
         newRoom = state.map[currentRoom][direction]
         return newRoom
     else:
@@ -83,11 +83,13 @@ def get_command(item, currentRoom, state):
     player's inventory and delete it from the room. If it
     is not in the room, print a message saying so.
     """
+    # First we get the dictionary containing the room description
+    room_description = state.map[currentRoom]
     if item is None:
         print("You didn't tell me what to get!")
-    elif 'item' in state.map[currentRoom] and item == state.map[currentRoom]['item']:
+    elif 'item' in room_description and room_description['item'] == item:
         # Add the item to their inventory
-        state.inventory.insert(0, state.map[currentRoom]['item'])
+        state.inventory.insert(0, item)
         print('You picked up the ' + item)
         # Delete the item from the room
         del state.map[currentRoom]['item']
