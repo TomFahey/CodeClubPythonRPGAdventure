@@ -1,76 +1,81 @@
-"""Graphics: the emoji, the room tiles, and the map of the dungeon.
+"""Graphics for the dungeon, using nothing but the standard library.
 
-The game in game.py only needs two things from here, ``_showMap`` and
-``_showInventory``, so a learner can ignore everything else in this file.
+A stand-in for gui.py for places that have no numpy -- the editor on
+projects.raspberrypi.org, for instance, which runs Python 3.7 and has no
+third-party packages at all.  It offers the same things gui.py does, so game.py
+only has to change which one it imports:
 
-The names in ``icons`` are the item names a learner can use in their room
-dictionary -- 'key', 'potion', 'sword' and so on.
+    from gui_pure import _showMap, _showInventory
+
+The map is held as lists of lists of strings instead of a numpy array.  As a
+bonus no glyph is ever cut short to fit a fixed-width cell, which numpy's
+two-code-point tile dtype insisted on.
+
+The editor there also has only a cut-down standard library: it provides
+`random.seed` and `random.choice`, but not `random.Random`.  So this file
+imports `random` and nothing else.
 """
 
-import random
+import random as ran
+from p5 import *
 
-import numpy as np
-
-TILE_DTYPE = "U2"      # the widest glyph drawn is an emoji plus a selector
+FONT = None
 INVENTORY_SIZE = 5     # how many items the inventory bar has room for
 ROOM_SIZES = (5, 7)    # the sizes a room may be given, in tiles
 MAP_MARGIN = 4         # black tiles kept round the outside of the rooms
+TEXT_SIZE = 8
 
 DIRECTIONS = ('north', 'south', 'east', 'west')
 
 # Drawn in place of an item name that has no icon in the dictionary below.
-UNKNOWN_ITEM = "\N{BLACK QUESTION MARK ORNAMENT}"
+UNKNOWN_ITEM = "\U00002753"    # ❓
 
-
-icons = {    
+icons = {
     ### Weapons
-    "dagger" :          f"\N{DAGGER KNIFE}️",                    ### 🗡 
+    "dagger" :          "\U0001F5E1\U0000FE0F",                 ### 🗡 
     "sword" :           "\U0001F5E1\U0000FE0F",                 ### 🗡️
     "shield" :          "\U0001F6E1\U0000FE0F",                 ### 🛡️
-    "bow" :             f"\N{BOW AND ARROW}",                   ### 🏹
-    "axe" :             f"\N{AXE}",                             ### 🪓
-    "torch" :           f"\N{ELECTRIC TORCH}",                  ### 🔦
+    "bow" :             "\U0001F3F9",                           ### 🏹
+    "axe" :             "\U0001FA93",                           ### 🪓
+    "torch" :           "\U0001F526",                           ### 🔦
     ### Consumables
-    "potion" :          f"\N{TEST TUBE}",                       ### 🧪
-    "key" :             f"\N{KEY}️",                             ### 🔑
-    "treasure" :        f"\N{MONEY BAG}",                       ### 💰
+    "potion" :          "\U0001F9EA",                           ### 🧪
+    "key" :             "\U0001F511\U0000FE0F",                 ### 🔑
+    "treasure" :        "\U0001F4B0",                           ### 💰
     ### Entities
-    "player" :          f"\N{STANDING PERSON}",                 ### 🧍
-    "monster" :         f"\N{JAPANESE OGRE}",                   ### 👹
-    "vampire" :         f"\N{VAMPIRE}",                         ### 🧛
-    "zombie" :          f"\N{ZOMBIE}",                          ### 🧟
-    "ninja" :           f"\N{NINJA}",                           ### 🥷
+    "player" :          "\U0001F9CD",                           ### 🧍
+    "monster" :         "\U0001F479",                           ### 👹
+    "vampire" :         "\U0001F9DB",                           ### 🧛
+    "zombie" :          "\U0001F9DF",                           ### 🧟
+    "ninja" :           "\U0001F977",                           ### 🥷
     "spider" :          "\U0001F577\U0000FE0F",                 ### 🕷️
-    "snake" :           f"\N{SNAKE}",                           ### 🐍
-    "lizard" :          f"\N{LIZARD}",                          ### 🦎
-    "bat" :             f"\N{BAT}",                             ### 🦇
-    "harambe" :         f"\N{GORILLA}",                         ### 🦍
-    "shark" :           f"\N{SHARK}",                           ### 🦈
-    "crocodile" :       f"\N{CROCODILE}",                       ### 🐊
+    "snake" :           "\U0001F40D",                           ### 🐍
+    "lizard" :          "\U0001F98E",                           ### 🦎
+    "bat" :             "\U0001F987",                           ### 🦇
+    "harambe" :         "\U0001F98D",                           ### 🦍
+    "shark" :           "\U0001F988",                           ### 🦈
+    "crocodile" :       "\U0001F40A",                           ### 🐊
     ### Obstacles
-    "lock" :            f"\N{LOCK}",                            ### 🔒
-    "door" :            f"\N{DOOR}",                            ### 🚪
+    "lock" :            "\U0001F512",                           ### 🔒
+    "door" :            "\U0001F6AA",                           ### 🚪
     ### Environment
-    "wall" :            f"\N{BRICK}",                           ### 🧱
-    "wallpaper" :       f"\N{LARGE BROWN SQUARE}",              ### 🟫
-    "black_square" :    f"\N{BLACK LARGE SQUARE}",              ### ⬛
-    "white_square" :    f"\N{WHITE LARGE SQUARE}",              ### ⬜
-    "floor" :           "\U000025AA\U0000FE0F",                 ### ▪️
+    "wall" :            "\U0001F9F1",                           ### 🧱
+    "wallpaper" :       "\U0001F7EB",                           ### 🟫
+    "black_square" :    "\U00002B1B",                           ### ⬛
+    "white_square" :    "\U00002B1C",                           ### ⬜
+    "floor" :           " ",                 ### ▪️
     ### Decorations
-    "plant" :           f"\N{POTTED PLANT}",                    ### 🪴
-    "statue" :          f"\N{MOYAI}",                           ### 🗿
-    "cobweb" :          f"\N{SPIDER WEB}",                      ### 🕸️
+    "plant" :           "\U0001FAB4",                           ### 🪴
+    "statue" :          "\U0001F5FF",                           ### 🗿
+    "cobweb" :          "\U0001F578",                           ### 🕸️
     ### Miscellaneous
-    "question_mark" :   f"\N{WHITE QUESTION MARK ORNAMENT}",    ### ❔
-    "empty" :           f""                                     ### 
+    "question_mark" :   "\U00002754",                           ### ❔
+    "heart" :           "\U0001F9E1",                           ### 🧡
+    "empty" :           "",                                     ### 
 
 }
 
-inventory_bar = r"""
-■■■■▶ Inventory ◀■■■■
-▫ {0} {1} {2} {3} {4} ▫
-■■■■■■■■■■■■■■■■■■■■■■
-"""
+inventory_bar = r"""▫ {0} {1} {2} {3} {4} ▫"""
 
 class Room:
     """One room of the dungeon.
@@ -95,26 +100,28 @@ class Room:
         return set(self.neighbours)
 
     def walls(self):
-        """The one-cell wall around the edge of the room."""
-        return np.pad(
-            np.zeros((self.height - 2, self.width - 2)), 1, constant_values=1
-        ) == 1
+        """A grid that is True wherever the wall runs round the edge."""
+        return [
+            [row == 0 or row == self.height - 1
+             or column == 0 or column == self.width - 1
+             for column in range(self.width)]
+            for row in range(self.height)
+        ]
 
     def floor(self):
-        """The inside of the room, where items and the player are drawn."""
-        return np.logical_not(self.walls())
+        """A grid that is True for the inside of the room."""
+        return [[not wall for wall in wall_row] for wall_row in self.walls()]
 
     def doorway(self, direction):
-        """The wall cell that the doorway in ``direction`` is cut through."""
-
+        """The single wall cell the doorway in ``direction`` is cut through."""
         if direction == 'north':
-            return slice(0, 1), slice(self.width // 2, self.width // 2 + 1)
+            return 0, self.width // 2
         elif direction == 'south':
-            return slice(self.height - 1, self.height), slice(self.width // 2, self.width // 2 + 1)
+            return self.height - 1, self.width // 2
         elif direction == 'east':
-            return slice(self.height // 2, self.height // 2 + 1), slice(self.width - 1, self.width)
+            return self.height // 2, self.width - 1
         elif direction == 'west':
-            return slice(self.height // 2, self.height // 2 + 1), slice(0, 1)
+            return self.height // 2, 0
         raise ValueError(f"unknown direction {direction!r}")
 
     def item_slots(self):
@@ -122,25 +129,35 @@ class Room:
 
         The middle cell is left out, because that is where the player stands.
         """
+        inside = self.floor()
         middle = (self.height // 2, self.width // 2)
         return [
-            tuple(cell) for cell in np.argwhere(self.floor())
-            if tuple(cell) != middle
+            (row, column)
+            for row in range(self.height)
+            for column in range(self.width)
+            if inside[row][column] and (row, column) != middle
         ]
 
     def room_tile(self):
         """This room drawn as its own small grid of glyphs."""
-        tile = np.full((self.height, self.width), "", dtype=TILE_DTYPE)
-        tile[self.walls()] = icons['wall'] # Tile wall areas with wall icon
-        tile[self.floor()] = icons['floor'] # Tile floor areas with floor icon
+        walls = self.walls()
+        # Tile wall and floor areas with their respective icons
+        tile = [
+            [icons['wall'] if walls[row][column] else icons['floor']
+             for column in range(self.width)]
+            for row in range(self.height)
+        ]
+        # Tile doorways with the door icon
         for direction in self.doors:
-            tile[self.doorway(direction)] = icons['door'] # Tile doorways with door icon
+            row, column = self.doorway(direction)
+            tile[row][column] = icons['door']
         slots = self.item_slots()
+        # Tile items with their respective icons
         for item in self.items:
             # Pseudo-random placement of item based on its name
             index = sum(ord(c) for c in item) % len(slots)
-            cell = slots.pop(index)
-            tile[cell] = icons.get(item, UNKNOWN_ITEM) # Tile item at the chosen cell
+            row, column = slots.pop(index)
+            tile[row][column] = icons.get(item, UNKNOWN_ITEM)
         return tile
 
     @property
@@ -150,8 +167,16 @@ class Room:
 
     @property
     def window(self):
-        """The part of the whole map that this room fills."""
-        return np.s_[self.y:self.y + self.height, self.x:self.x + self.width]
+        """Where this room sits on the map, as (top, left, bottom, right)."""
+        return self.y, self.x, self.y + self.height, self.x + self.width
+
+    def draw_onto(self, map_data):
+        """Copy this room's glyphs onto the map grid."""
+        top, left, bottom, right = self.window
+        tile = self.data
+        for row in range(top, bottom):
+            for column in range(left, right):
+                map_data[row][column] = tile[row - top][column - left]
 
     @property
     def north(self):
@@ -209,7 +234,7 @@ class GameMap:
         # may not manage a string.
         if seed is None:
             seed = sum(ord(character) for character in ''.join(sorted(rooms)))
-        random.seed(seed)
+        ran.seed(seed)
 
         for name, room in rooms.items():
             for way in DIRECTIONS:
@@ -243,14 +268,14 @@ class GameMap:
         #    to each group of rooms joined that way...
         widths = {}
         for group in groups(('north', 'south')):
-            width = random.choice(ROOM_SIZES)
+            width = ran.choice(ROOM_SIZES)
             for name in group:
                 widths[name] = width
 
         #    ...and one height to each group of rooms joined east/west.
         heights = {}
         for group in groups(('east', 'west')):
-            height = random.choice(ROOM_SIZES)
+            height = ran.choice(ROOM_SIZES)
             for name in group:
                 heights[name] = height
 
@@ -324,58 +349,48 @@ class GameMap:
         return built
 
     def render(self, current_room=None):
-        """Draw the whole map, hiding the rooms not visited yet.
+        """Draw the whole map, with everything not found yet left black.
 
-        Everything starts out black -- the tiles outside the rooms as well as
-        the rooms not found yet -- so the player sees themselves in the middle
-        of an unexplored map.  A cell stays visible if any room covering it has
-        been visited, so the wall shared with a room next door is not blocked
-        out.
+        Starting from black means the tiles outside the rooms and the rooms not
+        visited yet come out the same, so the player sees themselves in the
+        middle of an unexplored map.  A room is shown if the player has been in
+        it, or is standing in it now.
         """
         if current_room is None:
             current_room = self.current_room
-        rows, cols = self.rows, self.cols
-        map_data = np.full((rows, cols), icons['black_square'], dtype=TILE_DTYPE)
-        owner = np.full((rows, cols), -1, dtype=int)
-        found = np.zeros((rows, cols), dtype=bool)
+        map_data = [[icons['empty']] * self.cols for _ in range(self.rows)]
 
-        for index, room in enumerate(self.rooms.values()):
-            map_data[room.window] = room.data
-            owner[room.window] = index
-            # The room the player is standing in is always on show anyway.
+        for room in self.rooms.values():
             if room.visited or room is current_room:
-                found[room.window] = True
+                room.draw_onto(map_data)
 
-        map_data[current_room.y + current_room.height // 2,
-                 current_room.x + current_room.width // 2] = icons['player']
+        map_data[current_room.y + current_room.height // 2][
+            current_room.x + current_room.width // 2] = icons['player']
 
-        return np.ma.MaskedArray(
-            map_data,
-            mask=(owner >= 0) & ~found,
-            fill_value=icons['black_square'],
-        )
+        return map_data
 
     @property
     def map_array(self):
-        return self.render(self.current_room)
+        """The map as a plain grid of glyphs.  The same as render()."""
+        return self.render()
 
     def __str__(self):
-        return '\n'.join([''.join(row) for row in self.map_array.filled(icons['black_square'])])
+        return '\n'.join([''.join(row) for row in self.map_array])
 
     def __repr__(self):
         return f"GameMap({len(self.rooms)} rooms, {self.cols}x{self.rows})"
 
 
-def _showInventory(inventory):
+def showInventory(inventory):
     """Draw the inventory bar.  ``inventory`` holds the names of items picked up.
 
     This is one of the two calls game.py needs.
     """
     picked_up = [icons.get(item, UNKNOWN_ITEM) for item in inventory[:INVENTORY_SIZE]]
     picked_up += [icons['white_square']] * (INVENTORY_SIZE - len(picked_up))
-    print(inventory_bar.format(*picked_up))
+    return inventory_bar.format(*picked_up)
 
-def _showRoom(currentRoom, rooms):
+def showRoom(currentRoom, rooms):
     """Draw the current room in isolation."""
     game_map = GameMap(rooms)
     current_room = game_map.rooms[currentRoom]
@@ -385,9 +400,45 @@ def _showRoom(currentRoom, rooms):
         print(''.join(row))
 
 
-def _showMap(currentRoom, rooms):
+def showMap(currentRoom, rooms):
     """Draw the whole dungeon.  This is the other call game.py needs."""
     game_map = GameMap(rooms)
     game_map.current_room = game_map.rooms[currentRoom]
-    for row in game_map.render().filled(icons['black_square']):
-        print(''.join(row))
+    return game_map.render()
+
+
+def setup():
+    size(400, 400)
+    no_stroke()
+    text_size(TEXT_SIZE)
+    FONT = load_font("https://github.com/googlefonts/noto-emoji/raw/refs/heads/main/2D/fonts/NotoColorEmoji_WindowsCompatible.ttf")
+    if FONT is not None:
+        text_font(FONT)
+    else:
+        print('Failed to load font')
+    no_loop()
+
+def draw_background():
+    BROWN = Color(185, 155, 115)
+    BLUE = Color(5, 5, 5)
+    background(BLUE) 
+    fill(BROWN)
+
+def draw_map(state, x_scale, y_scale, x_offset, y_offset):
+    game_map = showMap(state.currentRoom, state.map)
+    for row_number, row in enumerate(game_map):
+        for col_number,character, in enumerate(row):
+            text(character, x_offset+col_number*x_scale, y_offset+row_number*y_scale)
+
+def draw_healthbar(health):
+    text(health*icons['heart'], 330, 30)
+
+def draw_inventory(inventory):
+    text(showInventory(inventory), 30, 30)
+        
+def draw_all(state):
+    draw_background()
+    draw_map(state, TEXT_SIZE, TEXT_SIZE, 100, 100)
+    draw_inventory(state.inventory)
+    if 'health' in state.__dict__:
+        draw_healthbar(state.health)
