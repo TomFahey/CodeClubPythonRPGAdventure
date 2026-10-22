@@ -384,30 +384,40 @@ class GameMap:
 def showInventory(inventory):
     """Draw the inventory bar.  ``inventory`` holds the names of items picked up.
 
-    This is one of the two calls game.py needs.
+    Returns a single string.
     """
     picked_up = [icons.get(item, UNKNOWN_ITEM) for item in inventory[:INVENTORY_SIZE]]
     picked_up += [icons['white_square']] * (INVENTORY_SIZE - len(picked_up))
     return inventory_bar.format(*picked_up)
 
 def showRoom(currentRoom, rooms):
-    """Draw the current room in isolation."""
+    """Draw the current room in isolation. Not used in the game, but useful for debugging.
+    
+    Returns a 2D list of strings, with each element a single tile.
+    """
     game_map = GameMap(rooms)
     current_room = game_map.rooms[currentRoom]
     data = current_room.data
     data[current_room.height // 2][current_room.width // 2] = icons['player']
-    for row in data:
-        print(''.join(row))
+    return data
 
 
 def showMap(currentRoom, rooms):
-    """Draw the whole dungeon.  This is the other call game.py needs."""
+    """Draw the whole dungeon. 
+    
+    Returns a 2D list of strings, with each element a single tile.
+    """
     game_map = GameMap(rooms)
     game_map.current_room = game_map.rooms[currentRoom]
     return game_map.render()
 
 
 def setup():
+    """Set up the game window and font.
+
+    Window size is set to 400x400 by default. The NotoColorEmoji font is loaded from
+    the web, for compatibility with computers with limited font sets.
+    """
     size(400, 400)
     no_stroke()
     text_size(TEXT_SIZE)
@@ -419,24 +429,41 @@ def setup():
     no_loop()
 
 def draw_background():
+    """Draw the background of the game window.
+    """
     BROWN = Color(185, 155, 115)
     BLUE = Color(5, 5, 5)
     background(BLUE) 
     fill(BROWN)
 
 def draw_map(state, x_scale, y_scale, x_offset, y_offset):
+    """Draw the whole dungeon, with the player in it.
+
+    x_scale and y_scale should be matched to the text size
+    x_offset and y_offset are used to center the map when changing
+    text or window size
+    """
     game_map = showMap(state.currentRoom, state.map)
     for row_number, row in enumerate(game_map):
         for col_number,character, in enumerate(row):
             text(character, x_offset+col_number*x_scale, y_offset+row_number*y_scale)
 
 def draw_healthbar(health):
+    """Draw the health bar at the top of the screen.
+    
+    The default coordinates (330, 30) can be changed for a different look.
+    """
     text(health*icons['heart'], 330, 30)
 
 def draw_inventory(inventory):
+    """Draw the inventory bar at the top of the screen.
+    
+    The default coordinates (30, 30) can be changed for a different look.
+    """
     text(showInventory(inventory), 30, 30)
         
 def draw_all(state):
+    """Wrapper to draw the background, map, inventory and (optional) health bar, from one call."""
     draw_background()
     draw_map(state, TEXT_SIZE, TEXT_SIZE, 100, 100)
     draw_inventory(state.inventory)
