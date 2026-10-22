@@ -128,7 +128,7 @@ def run_game(player):
         ######## Step 3) Match the *command* and *argument* to the right function
         
         if command == 'go': # If the command is 'go', run the go_command function
-            player.currentRoom = go_command(argument, currentRoom, player)
+            currentRoom = go_command(argument, currentRoom, player)
             
         elif command == 'get': # If the command is 'get', run the get_command function
             get_command(argument, currentRoom, player)
@@ -153,7 +153,7 @@ def run_game(player):
         #------------- Add more conditions here... ------------#
 
 
-
+        player.currentRoom = currentRoom
         no_loop()
 
 

@@ -59,7 +59,7 @@ class Player:
         self.currentRoom = startingRoom
         self.map = rooms 
         self.inventory = [] # Empty
-        #self.health = 3 # 3 hearts
+        self.health = 3 # 3 hearts
 
 # We create our player object, that records
 # which room we are currently in, our inventory
