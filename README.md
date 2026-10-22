@@ -65,13 +65,15 @@ The `Player` class is necessary to allow changes in the game state caused by the
 run_game(currentRoom, inventory, rooms)
 ```
 
-treated the basic game state (`currentRoom`, `inventory`, `rooms`) as local variables inside the function's namespace, changes to these values could not be communicated to the code in `gui.py`. The `player` object therefore provides a globally accessible replacement, which code in both `gui.py` and `game.py` are able to reach.
+treated the basic game state (`currentRoom`, `inventory`, `rooms`) as local variables inside the function's namespace, changes to these values had no way of propagating to the code in `gui.py` (without adding a load of distracting graphics related function calls to `game.py`). The `player` object therefore provides a globally accessible replacement, instantiated in `main.py`, allowing it to share its state with the code in both `gui.py` and `game.py`.
+
+The `draw()` and `run()` are the main graphics rendering functions from the `p5` library and therefore need to be present in the `main.py` file to allow the global gamestate to influence the graphics code. See `draw_all()` in `gui.py` for more details.
 
 ### Implications
 
-For pedagogical purposes, I think it is reasonable to essentially allow learners to "gloss over" this detail, as functionally speaking, from the point of view of `game.py`, the `player` object just ends up acting as a container object for the previous (`currentRoom`, `inventory`, `rooms`) variables, so `currentRoom -> player.currentRoom`, `inventory -> player.inventory` etc.
+For pedagogical purposes, I think it is reasonable to essentially allow learners to "gloss over" this detail, as functionally speaking, from the point of view of `game.py`, the `player` object just ends up acting as a container object for the previous (`currentRoom`, `inventory`, `rooms`) variables, so `currentRoom -> player.currentRoom`, `inventory -> player.inventory` etc. For more advanced students however (or as a later extension), the `Player` class can actually act as a natural vehicle for implementing additional game features, such as "equipped items", "player effects (invisibility?)", etc.
 
-In a similar manner, `draw()` and `run()` should simply be treated as black-box functions that implement the graphical output, as they are beyond the scope of the lesson concepts.
+Both `draw()` and `run()` should simply be treated as black-box functions that implement the graphical output, as they are beyond the scope of the lesson concepts.
 
 ## game.py
 
