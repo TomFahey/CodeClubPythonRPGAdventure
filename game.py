@@ -35,7 +35,11 @@ def run_game(player):
     # Loop forever
     while True:
 
-        showStatus(player.currentRoom, player.inventory, player.map)
+        currentRoom = player.currentRoom
+        inventory = player.inventory
+        rooms = player.rooms
+
+        showStatus(currentRoom, inventory, rooms)
         loop()
 
         # Get the player's next 'move'
@@ -51,32 +55,37 @@ def run_game(player):
         # If they type 'go' first
         if move[0] == 'go':
             # Check that they are allowed wherever they want to go
-            if move[1] in player.map[player.currentRoom]:
+            if move[1] in rooms[currentRoom]:
                 # Set the current room to the new room
-                player.currentRoom = player.map[player.currentRoom][move[1]]
+                currentRoom = rooms[currentRoom][move[1]]
             else:
                 print('You cannot go that way!')
 
         # If they type 'get' first
         if move[0] == 'get':
             # If the room contains an item, and the item is the one they want to get
-            if 'item' in player.map[player.currentRoom] and move[1] == player.map[player.currentRoom]['item']:
+            if 'item' in rooms[currentRoom] and move[1] == rooms[currentRoom]['item']:
                 # Add the item to their inventory
-                player.inventory.append(move[1])
+                inventory.append(move[1])
                 print('You picked up the ' + move[1])
                 # Delete the item from the room
-                del player.map[player.currentRoom]['item']
+                del rooms[currentRoom]['item']
             else:
                 # Tell them they can't get it
                 print('There is no ' + move[1] + ' here!')
 
-        if 'item' in player.map[player.currentRoom] and player.map[player.currentRoom]['item'] == 'monster':
+        if 'item' in rooms[currentRoom] and rooms[currentRoom]['item'] == 'monster':
             print('A monster has got you... GAME OVER!')
             break
 
         # add more game play here
 
+        # Update the player object with the current state
+        player.currentRoom = currentRoom
+        player.inventory = inventory
+        player.rooms = rooms
         no_loop()
+
 
 
     return player.currentRoom, player.inventory

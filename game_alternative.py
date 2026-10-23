@@ -23,19 +23,17 @@ get [item]       # e.g get key
 
 
 
-def showStatus(state):
+def showStatus(player):
     """Print a message showing the room the player is
     currenly in, as well as any items that are present
     and return the current room they are in.
     """
     print('---------------------------')
-    print('You are in the ' + state.currentRoom)
-    if 'item' in state.map[state.currentRoom]:
-        print('You see a ' + state.map[state.currentRoom]['item'])
+    print('You are in the ' + player.currentRoom)
+    if 'item' in player.rooms[player.currentRoom]:
+        print('You see a ' + player.rooms[player.currentRoom]['item'])
     print('---------------------------')
-    state.map[state.currentRoom]['visited'] = True
-    return state.currentRoom
-
+    player.rooms[player.currentRoom]['visited'] = True
 
     
 def get_player_command():
@@ -56,7 +54,7 @@ def get_player_command():
 
 
 
-def go_command(direction, currentRoom, state):
+def go_command(direction, player):
     """Move the player to a different room if possible
 
     If there is a room in the *direction* they pick,
@@ -64,19 +62,19 @@ def go_command(direction, currentRoom, state):
     are currently in
     """
     # First we get the dictionary containing the room description
-    room_description = state.map[currentRoom]
+    room_description = player.rooms[player.currentRoom]
     # If the direction we has picked is in the room description,
     # we can move to that room
     if direction in room_description: 
-        newRoom = state.map[currentRoom][direction]
+        newRoom = player.rooms[player.currentRoom][direction]
         return newRoom
     else:
         print('You cannot go that way!')
-        return currentRoom
+        return player.currentRoom
 
 
 
-def get_command(item, currentRoom, state):
+def get_command(item, player):
     """Get the specified *item* from the room
 
     If the requested *item* is in the room, move it to the
@@ -84,15 +82,15 @@ def get_command(item, currentRoom, state):
     is not in the room, print a message saying so.
     """
     # First we get the dictionary containing the room description
-    room_description = state.map[currentRoom]
+    room_description = player.rooms[player.currentRoom]
     if item is None:
         print("You didn't tell me what to get!")
     elif 'item' in room_description and room_description['item'] == item:
         # Add the item to their inventory
-        state.inventory.insert(0, item)
+        player.rooms.inventory.insert(0, item)
         print('You picked up the ' + item)
         # Delete the item from the room
-        del state.map[currentRoom]['item']
+        del player.rooms[player.currentRoom]['item']
     else:
         # Tell them they can't get it
         print('There is no ' + item + ' here!')
@@ -115,7 +113,8 @@ def run_game(player):
         
         ######## Step 1) Show the Player's current status, using the *player* state
         
-        currentRoom = showStatus(player)
+        ## Get the current state from the player object
+        showStatus(player)
         loop()
         
 
@@ -128,10 +127,10 @@ def run_game(player):
         ######## Step 3) Match the *command* and *argument* to the right function
         
         if command == 'go': # If the command is 'go', run the go_command function
-            currentRoom = go_command(argument, currentRoom, player)
+            player.currentRoom = go_command(argument, player)
             
         elif command == 'get': # If the command is 'get', run the get_command function
-            get_command(argument, currentRoom, player)
+            get_command(argument, player)
                 
         elif command == '?': # If the command is '?', show the instructions again
             showInstructions()
@@ -146,14 +145,14 @@ def run_game(player):
         ######## Step 4) Check the game conditions
         
         # Player is in the room with a monster
-        if 'item' in player.map[currentRoom] and player.map[currentRoom]['item'] == 'monster':
+        currentRoom_description = player.rooms[player.currentRoom]
+        if 'item' in currentRoom_description and currentRoom_description['item'] == 'monster':
             print('A monster has got you... GAME OVER!')
             break
             
         #------------- Add more conditions here... ------------#
 
 
-        player.currentRoom = currentRoom
         no_loop()
 
 

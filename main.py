@@ -1,5 +1,5 @@
 from game import run_game
-from gui_pure import setup, draw_all
+from gui import setup, draw_all
 from p5 import run
 
 
@@ -55,19 +55,16 @@ rooms = {
 
 class Player:
 
-    def __init__(self, startingRoom, map):
+    def __init__(self, startingRoom, rooms):
         self.currentRoom = startingRoom
-        self.map = rooms 
+        self.rooms = rooms 
         self.inventory = [] # Empty
         self.health = 3 # 3 hearts
 
 # We create our player object, that records
 # which room we are currently in, our inventory
 # and which rooms we have visited.
-player = Player(
-    startingRoom='Hall', 
-    map = rooms
-)
+player = Player('Hall', rooms)
 
 def draw():
     global gamestate
